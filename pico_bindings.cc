@@ -10,6 +10,7 @@
 #include "javelin/console.h"
 #include "javelin/console_input_buffer.h"
 #include "javelin/dictionary/debug_dictionary.h"
+#include "javelin/dictionary/ascii_output_dictionary.h"
 #include "javelin/dictionary/dictionary.h"
 #include "javelin/dictionary/dictionary_definition.h"
 #include "javelin/dictionary/dictionary_list.h"
@@ -632,6 +633,8 @@ void InitJavelinMaster() {
 
   // Setup dictionary list.
   List<StenoDictionaryListEntry> dictionaries;
+  dictionaries.Add(StenoDictionaryListEntry(
+      &StenoAsciiOutputDictionary::instance, true));
   // dictionaries.Add(
   //     StenoDictionaryListEntry(&StenoDebugDictionary::instance, true));
 

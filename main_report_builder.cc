@@ -214,41 +214,30 @@ void MainReportBuilder::FlushAllIfRequired() {
 }
 
 void MainReportBuilder::SendKeyboardPageReport() {
-  uint8_t reportData[16];
+  uint8_t reportData[8] = {};
 
-  // The first 14 bytes match the internal buffer.
-  memcpy(reportData, buffers[0].data, 14);
-  reportData[14] = 0;
-  reportData[15] = 0;
+  reportData[0] = buffers[0].data[MODIFIER_OFFSET];
 
-  // Quick reject test for array data, which resides in 0x70 - 0xa7
-  if (buffers[0].presenceFlags16[7] | buffers[0].presenceFlags32[4] |
-      buffers[0].presenceFlags32[5] | buffers[0].presenceFlags32[6] |
-      buffers[0].presenceFlags32[7]) {
+  size_t offset = 2;
+  for (size_t i = 1; i < 0xe0 / 8 + 1; ++i) {
+    const uint8_t byte = buffers[0].data[i];
+    if (!byte) {
+      continue;
+    }
 
-    size_t offset = 14;
-    for (size_t i = 0x70 / 8; i < 0x100 / 8; ++i) {
-      const uint8_t byte = buffers[0].data[i];
-      if (!byte) {
-        continue;
-      }
-
-      for (size_t bit = 0; bit < 8; bit++) {
-        if (byte & (1 << bit)) {
-          size_t logical = i * 8 + bit;
-          if (logical < 0xe8) {
-            logical -= 8;
-          }
-          reportData[offset++] = logical;
-          if (offset == 16) {
-            goto done;
-          }
+    for (size_t bit = 0; bit < 8; ++bit) {
+      if (byte & (1 << bit)) {
+        const uint8_t key = uint8_t(i * 8 + bit - 8);
+        reportData[offset++] = key;
+        if (offset == sizeof(reportData)) {
+          goto done;
         }
       }
     }
   }
+
 done:
-  SendReport(KEYBOARD_PAGE_REPORT_ID, reportData, sizeof(reportData));
+  SendReport(0, reportData, sizeof(reportData));
 }
 
 void MainReportBuilder::ConsumerPageBuffer::BuildConsumerPageReport(

@@ -38,13 +38,8 @@ public:
   }
 
   void SetConfiguration(uint8_t configurationValue) {
-    if (configurationValue == 0) {
-      compatibilityMode = false;
-      repeatReportCount = 0;
-    } else {
-      compatibilityMode = true;
-      repeatReportCount = configurationValue - 1;
-    }
+    compatibilityMode = true;
+    repeatReportCount = configurationValue == 0 ? 2 : configurationValue - 1;
   }
   void AddConsoleCommands(Console &console);
   static void GetKeyboardProtocol_Binding();
@@ -115,10 +110,10 @@ private:
     void BuildConsumerPageReport(uint8_t (&reportData)[16]) const;
   };
 
-  bool compatibilityMode = false;
+  bool compatibilityMode = true;
   uint8_t modifiers = 0;
   uint8_t maxPressIndex = 0;
-  uint8_t repeatReportCount = 0;
+  uint8_t repeatReportCount = 2;
   int wpmTally = 0;
   Buffer buffers[2];
   MouseBuffer mouseBuffers[2];
